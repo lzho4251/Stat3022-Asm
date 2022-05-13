@@ -1,0 +1,171 @@
+---
+title: "STAT3022 ASM"
+author: "Lifan Zhou"
+date: "2022/4/19"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#1
+1）
+$$toatl=1045.9715-3.6242*ratio + 1.6379*salary+4.4626*expend-2.9045*perc$$
+
+
+2）
+They are not contradiction
+For t-test
+H0: total~ratio+expend+prec
+H1: total~ratio+expend+prec+Salary
+it is the full model(assume other variable all in the model) with and without Salary
+
+For f-test:
+H0: total~ratio
+H1: total~ratio+Salary
+the F test check whether at least Salary has to be in the model
+  
+f=(53055/1)/(48124/45)~F(1,45)
+
+3)
+There are not obvious violation of constant variance and normality,just some potential outliers
+
+4)
+From model A ,44 Utah,29 New Hampshire,34 North Dakota can be considered as influential observation
+From DFFITS view: we would think if the value is larger than 2*(sqrt(p/n)) 
+which is 2*(sqrt(5/50)) ,then the value can be considered as influential observation.
+2*(sqrt(5/50))   >> 44 Utah,29 New Hampshire,34 North Dakota
+
+
+outlier:
+|extResiduals|should be larger than t(1-alpha/2,n-1-p)
+that is 
+```{r}
+qt(0.975,44) 
+```
+44 Utah,34 North Dakota,29 New Hampshire
+ 
+ 
+leverage:
+hii should be larger than  2*p/n 
+or 3*p/n
+2*5/50 = 0.2 
+3*5/50 = 0.3  
+44 Utah 
+
+
+5)
+The model may have Multicollinearity problem:
+regression parameters  are difficult to interpret, we can not conclude that the effect of ratio and salary  are  different. when new variables are added, the OLS estimates can change daramatically
+
+6)
+```{r}
+vif1<-1/(1-0.5890192)
+vif2<-1/(1-0.8915076)
+vif3<-1/(1-0.8943512)
+vif4<-1/(1-0.4302286)
+c(vif1,vif2,vif3,vif4)
+```
+
+
+7)
+```{r}
+VIF<-1/(1-0.8246)
+VIF
+```
+Model A has serious multicollinearity.From ggpairs plot, salary and expend are high correlated,we may exclude covariate expend from the model to solve this problem  
+
+
+2
+1)
+```{r}
+attach(mtcars)
+modle_a<-lm(mpg~wt+qsec)
+summary(modle_a)
+```
+$$mpg=19.7462-5.0480*wt+0.9292*qsec$$
+
+2)
+```{r}
+modb<-lm(mpg~wt+qsec*vs)
+modc<-lm(mpg~wt+qsec*am)
+modd<-lm(mpg~wt+qsec*am+qsec*vs)
+```
+
+```{r}
+anova(modb)
+```
+
+$$H0:mpg~wt+qsec$$
+$$H1:mpg~wt+qsec+vs+qsec:vs$$
+```{r}
+f=((0.07+12.59)/2)/(182.80/27)
+qf(0.95,2,27)
+f
+```
+
+cannot reject h0  vs+qsec:vs is insignficiant
+the effect of 1/4 mile time on fuel consumption does not depends on engine shape 
+
+
+```{r}
+anova(modc)
+```
+$$H0:mpg~wt+qsec$$
+$$H1:mpg~wt+qsec+am +qsec:am$$
+
+```{r}
+f=((26.18+25.27)/2)/(144.01/27)
+qf(0.95,2,27)
+f
+```
+we can reject H0  am+qsec:am is signficiant
+the effect of 1/4 mile time on fuel consumption depends on transmission types 
+
+
+```{r}
+anova(modd)
+```
+we only have to include qsec:am and am in the model 
+
+
+3)
+```{r}
+summary(modc)
+```
+
+$$mpg=16.5290-3.7772*wt+0.8169*qesc-15.6137*am+1.0600 *(qesc:am)$$
+
+a):
+am=0 vs=0  $$mpg=16.5290-3.7772*wt+0.8169*qesc$$
+am=0 vs=1  $$mpg=16.5290-3.7772*wt+0.8169*qesc$$
+
+b):
+am=1 vs=0  $$mpg=(16.5290-15.6137)-3.7772*wt+(0.8169+1.0600)+*qesc$$
+am=1 vs=1  $$mpg=16.5290-3.7772*wt+0.8169*qesc-15.6137+1.0600 *(qesc)$$
+
+
+
